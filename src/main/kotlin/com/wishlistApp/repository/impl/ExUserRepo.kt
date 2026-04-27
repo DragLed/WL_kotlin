@@ -5,27 +5,32 @@ import com.wishlistApp.repository.UserRepository
 import com.wishlistApp.repository.Users
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class ExUserRepo : UserRepository {
-    
-    override fun post(user: User): User {
-        val id = Users.insert {
-            it[username] = user.username
-            it[password] = user.password
-            it[createdAt] = user.createdAt
-        }[Users.id]
-        return user.copy(id = id)
+
+    override fun create(user: User): User {
+        return transaction {
+            val id = Users.insert {
+                it[username] = user.username
+                it[password] = user.password
+            }[Users.id]
+
+            user.copy(id = id)
+        }
     }
 
+
     override fun findById(id: Int): User? {
-            return Users.select { Users.id eq id }
+            return transaction {   Users.select { Users.id eq id }
                 .map { it.toUser() }
                 .singleOrNull()
-
+            }
     }
 
     override fun findAll(): List<User> {
-        return Users.selectAll().map { it.toUser() }
+        return transaction { Users.selectAll().map { it.toUser() } }
+
     }
 
     // override fun update(user: User): Boolean {
@@ -39,14 +44,14 @@ class ExUserRepo : UserRepository {
 
 
     override fun delete(id: Int): Boolean {
-        return Users.deleteWhere { Users.id eq id } > 0
+        return transaction {   Users.deleteWhere { Users.id eq id } > 0
+        }
     }
 
     private fun ResultRow.toUser() =  User(
         id = this[Users.id],
         username = this[Users.username],
-        password = this[Users.password],
-        createdAt = this[Users.createdAt]
+        password = this[Users.password]
         )
 
 }

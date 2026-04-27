@@ -11,17 +11,16 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Route.configureRoutes(service: UserService) {
 
-    post("/auth") {
+    post("/users") {
         val request = call.receive<CreateUserRequest>()
         try {
-            val user = transaction {
-                service.addUser(
-                    request.username,
-                    request.password, 
-
+            val user = service.create(
+                request.username,
+                request.password
                 )
-            }
+
             call.respond(HttpStatusCode.Created, user)
+
         } catch (e: IllegalArgumentException) {
             call.respond(
                 HttpStatusCode.BadRequest,
@@ -29,5 +28,63 @@ fun Route.configureRoutes(service: UserService) {
             )
         }
     }
+
+    get("/users") {
+        try {
+            val users = service.getAll()
+            call.respond(HttpStatusCode.OK, users)
+        } catch (e: IllegalArgumentException) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf("error" to e.message)
+            )
+        }
+    }
+
+    get("/users/{id}") {
+        try {
+            val id = call.parameters["id"]?.toInt()
+            require(id != null && id > 0) { "Некорректный id" }
+
+            val user = service.getById(id)
+            if (user != null) {
+                call.respond(HttpStatusCode.OK, user)
+            }
+            else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+
+
+        } catch (e: IllegalArgumentException) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf("error" to e.message)
+            )
+        }
+    }
+
+    delete("/users/{id}") {
+        try {
+            val id = call.parameters["id"]?.toInt()
+            require(id != null && id > 0) { "Некорректный id" }
+
+            val message = service.delete(id)
+            if (message != null) {
+                call.respond(HttpStatusCode.OK, message)
+            }
+            else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+
+
+        } catch (e: IllegalArgumentException) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf("error" to e.message)
+            )
+        }
+    }
+
+
 
 }

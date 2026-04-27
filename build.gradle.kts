@@ -4,6 +4,10 @@ plugins {
     application
 }
 
+application {
+    mainClass.set("com.wishlistApp.MainKt")
+}
+
 group = "com.wishlistApp"
 version = "1.0.0"
 
@@ -11,21 +15,24 @@ repositories {
     mavenCentral()
 }
 
-val ktorVersion = "3.4.2"
+val ktorVersion = "2.3.12"
 val exposedVersion = "0.45.0"
 
 dependencies {
     // --- Ktor ---
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-routing:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
-    // --- Logging (фикс SLF4J) ---
+    // 🔥 Swagger / OpenAPI (фикс твоей ошибки)
+    implementation("io.ktor:ktor-server-swagger:$ktorVersion")
+    implementation("io.ktor:ktor-server-openapi:$ktorVersion")
+
+    // --- Logging ---
     implementation("ch.qos.logback:logback-classic:1.4.14")
 
-    // --- Database (Exposed) ---
+    // --- Exposed (ORM) ---
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
@@ -48,3 +55,4 @@ kotlin {
 tasks.test {
     useJUnitPlatform()
 }
+
