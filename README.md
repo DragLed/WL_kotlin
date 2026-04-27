@@ -33,15 +33,10 @@
 
 ## Стек
 
-| Технология | Назначение |
-| --- | --- |
-| `Kotlin 2.3.10` | основной язык проекта |
-| `Ktor 2.3.12` | HTTP-сервер и маршрутизация |
-| `Exposed 0.45.0` | работа с БД |
-| `PostgreSQL` | основное хранилище |
-| `kotlinx.serialization` | сериализация JSON |
-| `Gradle Kotlin DSL` | сборка и запуск |
-| `JDK 21` | рекомендуемая версия JVM |
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple?logo=kotlin)](https://kotlinlang.org/)
+[![Ktor](https://img.shields.io/badge/Ktor-2.3.7-orange)](https://ktor.io/)
+[![Exposed](https://img.shields.io/badge/Exposed-0.45.0-blue)](https://github.com/JetBrains/Exposed)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue?logo=postgresql)](https://www.postgresql.org/)
 
 ## Быстрый старт
 
