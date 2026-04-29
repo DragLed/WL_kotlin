@@ -25,10 +25,6 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 
-    // 🔥 Swagger / OpenAPI (фикс твоей ошибки)
-    implementation("io.ktor:ktor-server-swagger:$ktorVersion")
-    implementation("io.ktor:ktor-server-openapi:$ktorVersion")
-
     // --- Logging ---
     implementation("ch.qos.logback:logback-classic:1.4.14")
 
@@ -45,6 +41,9 @@ dependencies {
 
     // --- Tests ---
     testImplementation(kotlin("test"))
+
+    implementation("io.ktor:ktor-server-swagger:2.3.0")
+    implementation("io.ktor:ktor-server-openapi:2.3.0")
 }
 
 

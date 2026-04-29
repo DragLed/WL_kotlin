@@ -17,6 +17,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.Database
 import java.io.PrintStream
+import io.ktor.server.http.content.*
 
 
 fun main() {
@@ -42,11 +43,22 @@ fun main() {
         install(ContentNegotiation) {
             json()
         }
-
         routing {
 
-            configureRoutes(service)
+            get("/openapi.json") {
+                call.respondText(
+                    this::class.java.classLoader
+                        .getResource("openapi.json")!!
+                        .readText(),
+                    io.ktor.http.ContentType.Application.Json
+                )
+            }
 
+            static("/swagger") {
+                resources("swagger")
+            }
+
+            configureRoutes(service)
         }
     }.start(wait = true)
 }
