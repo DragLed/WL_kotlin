@@ -6,6 +6,7 @@ interface UserRepository {
     fun create(user: User): User
     fun findById(id: Int): User?
     fun findAll(): List<User>
-//    fun update(user: User): Boolean
+    fun updatename(id: Int, username: String): Boolean
+    fun updatepassword(id: Int, password: String): Boolean
     fun delete(id: Int): Boolean
 }

@@ -33,14 +33,21 @@ class ExUserRepo : UserRepository {
 
     }
 
-    // override fun update(user: User): Boolean {
-    //     return transaction {
-    //         Users.update({ Users.id eq user.id }) {
-    //             it[name] = user.name
-    //             it[email] = user.email
-    //         } > 0
-    //     }
-    // }
+    override fun updatename(id: Int, username: String): Boolean {
+        return transaction {
+            Users.update({ Users.id eq id }) {
+                it[Users.username] = username
+            } > 0
+        }
+    }
+
+    override fun updatepassword(id: Int, password: String): Boolean {
+        return transaction {
+            Users.update({ Users.id eq id }) {
+                it[Users.password] = password
+            } > 0
+        }
+    }
 
 
     override fun delete(id: Int): Boolean {
