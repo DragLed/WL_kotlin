@@ -24,9 +24,9 @@ class WishlistService(
          return WishlistRepository.findAll()
      }
 
-//     fun getById(id: Int): Wishlist? {
-//          return WishlistRepository.findById(id)
-//     }
+     fun getById(user_id:Int, wishlist_id: Int): Wishlist? {
+          return WishlistRepository.findById(user_id, wishlist_id)
+     }
 
 //    fun update (
 //        username: String

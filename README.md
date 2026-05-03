@@ -1,42 +1,89 @@
 # Wishlist API
 
-Лаконичный backend-сервис для wishlist-приложения на `Kotlin`, `Ktor`, `Exposed` и `PostgreSQL`.
+<div align="center">
+  <h3>Аккуратный Kotlin backend для wishlist-сервиса</h3>
+  <p>JWT-аутентификация, PostgreSQL, Exposed, Ktor и структура, которую приятно развивать дальше.</p>
 
-Сейчас проект уже умеет работать с пользователями, а доменные модели для wishlist-ов, подарков и ролей доступа подготовлены как основа для следующего этапа разработки.
+  <p>
+    <img src="https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin">
+    <img src="https://img.shields.io/badge/Ktor-2.3.12-111111?style=for-the-badge&logo=ktor&logoColor=white" alt="Ktor">
+    <img src="https://img.shields.io/badge/PostgreSQL-42.7.1-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+    <img src="https://img.shields.io/badge/Exposed-0.45.0-1D63ED?style=for-the-badge" alt="Exposed">
+    <img src="https://img.shields.io/badge/JDK-21-E76F00?style=for-the-badge" alt="JDK 21">
+  </p>
+</div>
 
-## О проекте
+---
 
-`Wishlist API` - это серверное приложение, в котором заложена база для сервиса списков желаний:
+## Что это
 
-- создание и хранение пользователей;
-- работа с PostgreSQL через `Exposed`;
-- JSON API на `Ktor`;
-- заготовка под OpenAPI/Swagger;
-- подготовленные модели для `wishlist`, `gift` и `wishlist access`.
+`Wishlist API` это backend-приложение на `Kotlin + Ktor`, которое уже умеет:
 
-Проект хорошо подходит как учебная backend-база, старт для pet-project или основа для дальнейшего развития полноценного REST API.
+- регистрировать пользователей;
+- логинить через `JWT access token`;
+- обновлять access token через `refresh_token` cookie;
+- создавать wishlist от имени авторизованного пользователя;
+- получать списки пользователей и wishlist-ов;
+- публиковать OpenAPI и Swagger UI.
 
-## Что уже работает
+Проект выглядит как крепкая база под pet-project, учебный сервис или стартовую backend-архитектуру для полноценного wishlist-продукта.
 
-- `POST /users` - создать пользователя;
-- `GET /users` - получить список пользователей;
-- `GET /users/{id}` - получить пользователя по `id`;
-- `DELETE /users/{id}` - удалить пользователя;
-- автоматическое создание таблицы `users` при старте приложения.
+---
 
-## Что важно знать
+## Почему проект уже приятно трогать
 
-- подключение к PostgreSQL сейчас захардкожено в [`src/main/kotlin/com/wishlistApp/Main.kt`](src/main/kotlin/com/wishlistApp/Main.kt);
-- пароль пользователя пока хранится в открытом виде;
-- OpenAPI-зависимости уже подключены, а файл спецификации лежит в [`src/main/resources/openapi/documentation.yaml`](src/main/resources/openapi/documentation.yaml), но полноценная выдача Swagger UI из приложения ещё не настроена;
-- модели `Wishlist`, `Gift` и `WishlistAccess` уже есть в коде, но их маршруты и репозитории пока не реализованы.
+| Блок | Что внутри |
+|---|---|
+| `Auth` | access token + refresh token, защищённые маршруты через `authenticate("auth-jwt")` |
+| `Persistence` | PostgreSQL + `Exposed` + автоматическое создание таблиц |
+| `API layout` | роуты разнесены по `routing/Users.kt` и `routing/Wishlists.kt` |
+| `Validation` | базовые проверки входных данных в `service`-слое |
+| `Docs` | `GET /openapi` и `GET /swagger` уже подключены |
 
-## Стек
+---
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple?logo=kotlin)](https://kotlinlang.org/)
-[![Ktor](https://img.shields.io/badge/Ktor-2.3.7-orange)](https://ktor.io/)
-[![Exposed](https://img.shields.io/badge/Exposed-0.45.0-blue)](https://github.com/JetBrains/Exposed)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue?logo=postgresql)](https://www.postgresql.org/)
+## API Snapshot
+
+### User routes
+
+| Method | Path | Описание | Auth |
+|---|---|---|---|
+| `POST` | `/user` | регистрация пользователя | нет |
+| `POST` | `/login` | логин и выдача access token | нет |
+| `POST` | `/logout` | удаление refresh cookie | нет |
+| `POST` | `/refresh` | обновление access token по cookie | нет |
+| `GET` | `/me` | получить `userId` из JWT | да |
+| `GET` | `/users` | список пользователей | нет |
+| `GET` | `/user/{id}` | получить пользователя по id | нет |
+| `PUT` | `/user/{id}` | изменить username | нет |
+| `PUT` | `/user/password/{id}` | изменить пароль | нет |
+| `DELETE` | `/user/{id}` | удалить пользователя | нет |
+
+### Wishlist routes
+
+| Method | Path | Описание | Auth |
+|---|---|---|---|
+| `POST` | `/wishlist` | создать wishlist | да |
+| `GET` | `/wishlists` | получить все wishlist-ы | нет |
+| `GET` | `/wishlist/{id}` | получить wishlist по id | да |
+
+---
+
+## Как это работает
+
+```text
+Client
+  -> POST /user
+  -> POST /login
+     <- access token + refresh_token cookie
+  -> Authorization: Bearer <token>
+  -> POST /wishlist
+  -> GET /me
+  -> POST /refresh
+     <- новый access token
+```
+
+---
 
 ## Быстрый старт
 
@@ -44,17 +91,17 @@
 
 - `JDK 21`
 - `PostgreSQL`
-- доступный порт `8080`
+- свободный порт `8080`
 
-### 2. Создайте базу данных
+### 2. Создайте базу
 
 ```sql
 CREATE DATABASE wishlist_db;
 ```
 
-### 3. Проверьте настройки подключения
+### 3. Проверьте подключение к БД
 
-Сейчас проект использует такие параметры подключения в [`src/main/kotlin/com/wishlistApp/Main.kt`](src/main/kotlin/com/wishlistApp/Main.kt):
+Сейчас подключение захардкожено в [Main.kt](src/main/kotlin/com/wishlistApp/Main.kt):
 
 ```kotlin
 Database.connect(
@@ -65,106 +112,121 @@ Database.connect(
 )
 ```
 
-Если у вас другие логин, пароль или имя БД, просто обновите эти значения перед запуском.
+Если у вас другие логин, пароль или имя базы, обновите эти значения перед запуском.
 
-### 4. Запустите приложение
+### 4. Запуск
 
-Для Windows:
+Windows:
 
 ```powershell
 .\gradlew.bat run
 ```
 
-Для macOS/Linux:
+macOS / Linux:
 
 ```bash
 ./gradlew run
 ```
 
-После старта приложение будет доступно по адресу:
+После старта API будет доступен по адресу:
 
 ```text
 http://localhost:8080
 ```
 
-## Примеры запросов
+Swagger UI:
 
-### Создание пользователя
-
-```http
-POST /users
-Content-Type: application/json
+```text
+http://localhost:8080/swagger
 ```
 
-```json
-{
-  "username": "alice",
-  "password": "strongpass123"
-}
+OpenAPI:
+
+```text
+http://localhost:8080/openapi
 ```
 
-Пример через `curl`:
+---
+
+## Быстрые примеры
+
+### Регистрация
 
 ```bash
-curl -X POST http://localhost:8080/users \
-  -H "Content-Type: application/json" \
+curl -X POST http://localhost:8080/user ^
+  -H "Content-Type: application/json" ^
   -d "{\"username\":\"alice\",\"password\":\"strongpass123\"}"
 ```
 
-### Получить всех пользователей
+### Логин
 
 ```bash
-curl http://localhost:8080/users
+curl -X POST http://localhost:8080/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"username\":\"alice\",\"password\":\"strongpass123\"}"
 ```
 
-### Получить пользователя по `id`
+### Создание wishlist
 
 ```bash
-curl http://localhost:8080/users/1
+curl -X POST http://localhost:8080/wishlist ^
+  -H "Content-Type: application/json" ^
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" ^
+  -d "{\"title\":\"Birthday\",\"description\":\"Tech gifts\",\"visibility\":\"PUBLIC\"}"
 ```
 
-### Удалить пользователя
+### Получить все wishlist-ы
 
 ```bash
-curl -X DELETE http://localhost:8080/users/1
+curl http://localhost:8080/wishlists
 ```
 
-## Правила валидации
-
-На текущий момент сервис проверяет следующее:
-
-- `username` не должен быть пустым;
-- `password` не должен быть пустым;
-- длина `password` должна быть не меньше `8` символов;
-- `id` в маршрутах должен быть положительным числом.
+---
 
 ## Структура проекта
 
 ```text
 src/main/kotlin/com/wishlistApp
-|-- Main.kt                 # точка входа и подключение к БД
-|-- Routes.kt               # HTTP-маршруты
-|-- dto/                    # входные DTO для запросов
-|-- model/                  # доменные модели
-|-- repository/             # контракт и таблицы
-`-- service/                # бизнес-логика
+|-- Main.kt
+|-- core/
+|-- dto/
+|-- model/
+|-- repository/
+|   |-- impl/
+|   `-- tables/
+|-- routing/
+|   |-- Users.kt
+|   `-- Wishlists.kt
+`-- service/
 ```
 
-Дополнительно:
+Ключевые точки:
 
-- [`build.gradle.kts`](build.gradle.kts) - зависимости и конфигурация сборки;
-- [`docs/index.html`](docs/index.html) - статический Swagger UI-файл в репозитории;
-- [`src/main/resources/openapi/documentation.yaml`](src/main/resources/openapi/documentation.yaml) - черновик OpenAPI-спецификации.
+- [Main.kt](src/main/kotlin/com/wishlistApp/Main.kt) отвечает за запуск сервера, БД, Swagger и регистрацию роутов.
+- [Users.kt](src/main/kotlin/com/wishlistApp/routing/Users.kt) содержит регистрацию, логин, refresh и CRUD по пользователям.
+- [Wishlists.kt](src/main/kotlin/com/wishlistApp/routing/Wishlists.kt) отвечает за создание и чтение wishlist-ов.
 
-## Ближайшие улучшения
+---
 
-- вынести настройки БД в `application.conf` или переменные окружения;
-- добавить хэширование паролей;
-- реализовать CRUD для wishlist-ов и подарков;
-- подключить полноценную Swagger/OpenAPI-документацию;
-- добавить тесты для `service` и `routes`;
-- расширить обработку ошибок и ответы API.
+## Что важно знать
 
-## Итог
+- пароли при создании пользователя хэшируются через `BCrypt`;
+- `refresh_token` хранится в `httpOnly` cookie;
+- часть конфигурации пока хранится прямо в коде;
+- проект ещё не выглядит как production-ready, но уже хорошо подходит как сильная база под дальнейшее развитие.
 
-Сейчас это аккуратная и понятная база для будущего `wishlist`-сервиса: приложение уже запускается как Ktor API, сохраняет пользователей в PostgreSQL и задаёт хорошую структуру для дальнейшего роста проекта.
+---
+
+## Roadmap
+
+- вынести секреты и настройки БД в `application.conf` или переменные окружения;
+- закрыть изменение профиля и пароля авторизацией;
+- добавить CRUD для подарков и правил доступа;
+- покрыть маршруты и сервисы тестами;
+- довести OpenAPI-спецификацию до полного соответствия актуальным эндпоинтам.
+
+---
+
+## Финальный вайб
+
+Это уже не просто учебная заготовка, а backend, у которого есть понятная структура, аутентификация, работа с БД и первые реальные бизнес-сценарии. Для GitHub-репозитория такой README сразу объясняет, что проект живой, осмысленный и у него есть направление роста.

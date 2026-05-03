@@ -1,15 +1,12 @@
-package com.wishlistApp
+package com.wishlistApp.routing
 
 import com.wishlistApp.core.JwtConfig
 import com.wishlistApp.dto.ChangePasswordRequest
 import com.wishlistApp.dto.ChangeUsernameRequest
 import com.wishlistApp.dto.CreateUserRequest
-import com.wishlistApp.dto.CreateWishlistRequest
 import com.wishlistApp.dto.LoginRequest
-import com.wishlistApp.dto.TokenResponse
 import com.wishlistApp.dto.UserResponse
 import com.wishlistApp.service.UserService
-import com.wishlistApp.service.WishlistService
 import io.ktor.http.Cookie
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -23,19 +20,19 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
-import io.ktor.server.auth.authenticate
+import kotlin.text.toIntOrNull
 
-fun Route.configureRoutes(UserService: UserService, WishlistService: WishlistService) {
+fun Route.userRoute(UserService: UserService) {
 
 
-    post("/users") {
+    post("/user") {
 
         val request = call.receive<CreateUserRequest>()
 
         try {
             val user = UserService.create(
 
-                request.username, 
+                request.username,
                 request.password
             )
 
@@ -65,8 +62,7 @@ fun Route.configureRoutes(UserService: UserService, WishlistService: WishlistSer
             )
 
             call.respond(tokens.accessToken)
-        }
-        catch (e: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
             call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
         }
     }
@@ -76,7 +72,8 @@ fun Route.configureRoutes(UserService: UserService, WishlistService: WishlistSer
             Cookie(
                 name = "refresh_token",
                 value = "",
-                maxAge = 0
+                maxAge = 0,
+                path = "/"
             )
         )
 
@@ -122,7 +119,7 @@ fun Route.configureRoutes(UserService: UserService, WishlistService: WishlistSer
         }
     }
 
-    get("/users/{id}") {
+    get("/user/{id}") {
         try {
             val id = call.requirePositiveId()
             val user = UserService.getById(id)
@@ -140,7 +137,7 @@ fun Route.configureRoutes(UserService: UserService, WishlistService: WishlistSer
         }
     }
 
-    put("/users/{id}") {
+    put("/user/{id}") {
         try {
             val id = call.requirePositiveId()
             val request = call.receive<ChangeUsernameRequest>()
@@ -159,7 +156,7 @@ fun Route.configureRoutes(UserService: UserService, WishlistService: WishlistSer
         }
     }
 
-    put("/users/password/{id}") {
+    put("/user/password/{id}") {
         try {
             val id = call.requirePositiveId()
             val request = call.receive<ChangePasswordRequest>()
@@ -178,7 +175,7 @@ fun Route.configureRoutes(UserService: UserService, WishlistService: WishlistSer
         }
     }
 
-    delete("/users/{id}") {
+    delete("/user/{id}") {
         try {
             val id = call.requirePositiveId()
             val deleted = UserService.delete(id)
@@ -195,46 +192,6 @@ fun Route.configureRoutes(UserService: UserService, WishlistService: WishlistSer
             )
         }
     }
-
-
-    authenticate("auth-jwt") {
-
-        post("/wishlists") {
-
-            val principal = call.principal<io.ktor.server.auth.jwt.JWTPrincipal>()
-            val userId = principal!!.payload.getClaim("userId").asInt()
-
-            val request = call.receive<CreateWishlistRequest>()
-            try {
-                val wishlist = WishlistService.create(
-                    userId,
-                    request.title,
-                    request.description,
-                    request.visibility
-                )
-
-                call.respond(HttpStatusCode.Created, wishlist)
-            } catch (e: IllegalArgumentException) {
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    mapOf("error" to e.message)
-                )
-            }
-        }
-    }
-
-
-    get("/wishlists") {
-        try {
-            val wishlists = WishlistService.getAll()
-            call.respond(HttpStatusCode.OK, wishlists)
-        } catch (e: IllegalArgumentException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
-            )
-        }
-    }
 }
 
 private fun ApplicationCall.requirePositiveId(): Int {
@@ -244,3 +201,5 @@ private fun ApplicationCall.requirePositiveId(): Int {
     }
     return id
 }
+
+

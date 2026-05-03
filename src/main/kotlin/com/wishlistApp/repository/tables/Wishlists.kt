@@ -5,7 +5,7 @@ import com.wishlistApp.core.WishlistVisibility
 
 object Wishlists : Table("wishlists") {
     val id = integer("id").autoIncrement()
-    val userId = integer("user_id")
+    val userId = reference("user_id", Users.id)
     val title = text("title")
     val description = text("description")
 

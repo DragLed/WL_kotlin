@@ -3,6 +3,7 @@ package com.wishlistApp.repository.impl
 import com.wishlistApp.model.Wishlist
 import com.wishlistApp.repository.WishlistRepository
 import com.wishlistApp.repository.Wishlists
+import com.wishlistApp.repository.Wishlists.userId
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -24,12 +25,12 @@ class ExWishlistRepo : WishlistRepository {
     }
 
 
-//     override fun findById(id: Int): Wishlist? {
-//             return transaction {   Wishlists.select { Wishlists.id eq id }
-//                 .map { it.toWishlist() }
-//                 .singleOrNull()
-//             }
-//     }
+     override fun findById(user_id:Int, wishlist_id: Int): Wishlist? {
+             return transaction {   Wishlists.select { (Wishlists.id eq wishlist_id) and (Wishlists.userId eq userId) }
+                 .map { it.toWishlist() }
+                 .singleOrNull()
+             }
+     }
 
      override fun findAll(): List<Wishlist> {
          return transaction { Wishlists.selectAll().map { it.toWishlist() } }
