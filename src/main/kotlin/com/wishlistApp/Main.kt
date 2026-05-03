@@ -1,5 +1,6 @@
 package com.wishlistApp
 
+import com.wishlistApp.core.JwtConfig
 import com.wishlistApp.model.User
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -12,6 +13,7 @@ import com.wishlistApp.service.UserService
 import com.wishlistApp.service.WishlistService
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
+import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -49,6 +51,20 @@ fun main() {
 
     embeddedServer(Netty, port = 8080) {
 
+
+        install(io.ktor.server.auth.Authentication) {
+
+            jwt("auth-jwt") {
+                verifier(JwtConfig.verifier())
+
+                validate { credential ->
+                    val userId = credential.payload.getClaim("userId").asInt()
+                    if (userId != null) {
+                        io.ktor.server.auth.jwt.JWTPrincipal(credential.payload)
+                    } else null
+                }
+            }
+        }
 
 
         install(ContentNegotiation) { json() }

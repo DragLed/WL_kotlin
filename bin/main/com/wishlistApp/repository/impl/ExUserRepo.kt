@@ -9,6 +9,14 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class ExUserRepo : UserRepository {
 
+    override fun findByUsername(username: String): User? {
+        return transaction {
+            Users.select { Users.username eq username }
+                .map { it.toUser() }
+                .singleOrNull()
+        }
+    }
+
     override fun create(user: User): User {
         return transaction {
             val id = Users.insert {

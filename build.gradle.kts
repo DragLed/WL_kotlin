@@ -26,11 +26,18 @@ dependencies {
     implementation("io.ktor:ktor-server-openapi:$ktorVersion")
     implementation("io.ktor:ktor-server-swagger:$ktorVersion")
 
+    implementation("org.mindrot:jbcrypt:0.4")
+
     implementation("ch.qos.logback:logback-classic:1.4.14")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+
+    // 🔐 AUTH
+    implementation("io.ktor:ktor-server-auth:${ktorVersion}")
+    implementation("io.ktor:ktor-server-auth-jwt:${ktorVersion}")
+    implementation("com.auth0:java-jwt:4.4.0")
 
     implementation("org.postgresql:postgresql:42.7.1")
 

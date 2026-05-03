@@ -20,6 +20,12 @@ data class ChangePasswordRequest(
 
 
 @Serializable
-data class LoginResponse(
-    val token: String
+data class UserResponse(
+    val id: Int,
+    val username: String
+)
+@Serializable
+data class LoginRequest(
+    val username: String,
+    val password: String
 )
