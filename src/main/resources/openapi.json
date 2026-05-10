@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Wishlist API",
+    "title": "Wishlist App API",
     "version": "1.0.0",
-    "description": "API для управления пользователями и вишлистами."
+    "description": "REST API для приложения Wishlist App"
   },
   "servers": [
     {
@@ -12,39 +12,203 @@
     }
   ],
   "tags": [
-    {
-      "name": "Users",
-      "description": "Операции с пользователями"
-    },
-    {
-      "name": "Wishlists",
-      "description": "Операции с вишлистами"
-    }
+    { "name": "Auth" },
+    { "name": "Users" },
+    { "name": "Wishlists" },
+    { "name": "Gifts" }
   ],
-  "paths": {
-    "/users": {
-      "get": {
-        "tags": ["Users"],
-        "summary": "Получить список пользователей",
-        "responses": {
-          "200": {
-            "description": "Список пользователей",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              }
-            }
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Некорректный id"
           }
         }
       },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "username": {
+            "type": "string",
+            "example": "DragLed"
+          }
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "DragLed"
+          },
+          "password": {
+            "type": "string",
+            "example": "qwerty123"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "DragLed"
+          },
+          "password": {
+            "type": "string",
+            "example": "qwerty123"
+          }
+        }
+      },
+      "ChangeUsernameRequest": {
+        "type": "object",
+        "required": ["username"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "NewUsername"
+          }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "required": ["password"],
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "newPassword123"
+          }
+        }
+      },
+      "TokenResponse": {
+        "type": "string",
+        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      },
+      "CurrentUserResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "Wishlist": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "userId": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "Birthday Wishlist"
+          },
+          "description": {
+            "type": "string",
+            "example": "Подарки на день рождения"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-05-10T14:30:00"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": ["public", "link_only", "private"],
+            "example": "public"
+          }
+        }
+      },
+      "CreateWishlistRequest": {
+        "type": "object",
+        "required": ["title", "description", "visibility"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Birthday Wishlist"
+          },
+          "description": {
+            "type": "string",
+            "example": "Подарки на день рождения"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": ["public", "link_only", "private"],
+            "example": "public"
+          }
+        }
+      },
+      "Gift": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "WishListId": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "PlayStation 5"
+          },
+          "description": {
+            "type": "string",
+            "example": "Sony PlayStation 5 Slim"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "example": 54999.99
+          },
+          "is_reserved": {
+            "type": "boolean",
+            "example": false
+          },
+          "reserved_by": {
+            "type": "integer",
+            "example": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-05-10T14:30:00"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/user": {
       "post": {
         "tags": ["Users"],
-        "summary": "Создать пользователя",
+        "summary": "Регистрация пользователя",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -57,57 +221,105 @@
         },
         "responses": {
           "201": {
-            "description": "Пользователь создан",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
+            "description": "Пользователь создан"
           },
           "400": {
-            "description": "Некорректные входные данные",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Ошибка валидации"
           }
         }
       }
     },
-    "/users/{id}": {
+    "/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Авторизация",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Access token"
+          },
+          "400": {
+            "description": "Неверный логин или пароль"
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Выход из системы",
+        "responses": {
+          "200": {
+            "description": "Successfully logged out"
+          }
+        }
+      }
+    },
+    "/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Обновление access token",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Новый access token"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Получить текущего пользователя",
+        "responses": {
+          "200": {
+            "description": "Current user"
+          }
+        }
+      }
+    },
+    "/users": {
       "get": {
         "tags": ["Users"],
-        "summary": "Получить пользователя по id",
+        "summary": "Получить всех пользователей",
+        "responses": {
+          "200": {
+            "description": "Список пользователей"
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Получить пользователя по ID",
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Пользователь найден",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Некорректный id",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Пользователь найден"
           },
           "404": {
             "description": "Пользователь не найден"
@@ -116,10 +328,16 @@
       },
       "put": {
         "tags": ["Users"],
-        "summary": "Изменить имя пользователя",
+        "summary": "Изменить username",
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
           }
         ],
         "requestBody": {
@@ -134,27 +352,7 @@
         },
         "responses": {
           "200": {
-            "description": "Имя пользователя обновлено",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Некорректные входные данные",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Пользователь не найден"
+            "description": "Username updated"
           }
         }
       },
@@ -163,43 +361,35 @@
         "summary": "Удалить пользователя",
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Пользователь удалён",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Некорректный id",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Пользователь не найден"
+            "description": "Пользователь удалён"
           }
         }
       }
     },
-    "/users/password/{id}": {
+    "/user/password/{id}": {
       "put": {
         "tags": ["Users"],
-        "summary": "Изменить пароль пользователя",
+        "summary": "Изменить пароль",
         "parameters": [
           {
-            "$ref": "#/components/parameters/UserId"
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
           }
         ],
         "requestBody": {
@@ -214,27 +404,7 @@
         },
         "responses": {
           "200": {
-            "description": "Пароль пользователя обновлён",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Некорректные входные данные",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Пользователь не найден"
+            "description": "Password updated"
           }
         }
       }
@@ -242,26 +412,23 @@
     "/wishlists": {
       "get": {
         "tags": ["Wishlists"],
-        "summary": "Получить список вишлистов",
+        "summary": "Получить список всех вишлистов",
         "responses": {
           "200": {
-            "description": "Список вишлистов",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Wishlist"
-                  }
-                }
-              }
-            }
+            "description": "Список вишлистов"
           }
         }
-      },
+      }
+    },
+    "/wishlist": {
       "post": {
         "tags": ["Wishlists"],
-        "summary": "Создать вишлист",
+        "summary": "Создать новый вишлист",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -274,174 +441,158 @@
         },
         "responses": {
           "201": {
-            "description": "Вишлист создан",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Wishlist"
-                }
-              }
-            }
+            "description": "Вишлист успешно создан"
           },
           "400": {
-            "description": "Некорректные входные данные",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Ошибка валидации"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
           }
-        }
-      }
-    }
-  },
-  "components": {
-    "parameters": {
-      "UserId": {
-        "name": "id",
-        "in": "path",
-        "required": true,
-        "description": "Положительный идентификатор пользователя",
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "example": 1
         }
       }
     },
-    "schemas": {
-      "User": {
-        "type": "object",
-        "required": ["id", "username", "password"],
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 1
+    "/wishlist/{id}": {
+      "get": {
+        "tags": ["Wishlists"],
+        "summary": "Получить вишлист по ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Вишлист найден"
           },
-          "username": {
-            "type": "string",
-            "example": "alex"
+          "401": {
+            "description": "Пользователь не авторизован"
           },
-          "password": {
-            "type": "string",
-            "example": "strongPass123"
+          "404": {
+            "description": "Вишлист не найден или доступ запрещён"
           }
         }
       },
-      "Wishlist": {
-        "type": "object",
-        "required": ["id", "userId", "title", "description", "visibility"],
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 10
+      "delete": {
+        "tags": ["Wishlists"],
+        "summary": "Удалить вишлист",
+        "description": "Удалить вишлист может только его владелец.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Вишлист успешно удалён"
           },
-          "userId": {
-            "type": "integer",
-            "example": 1
+          "401": {
+            "description": "Пользователь не авторизован"
           },
-          "title": {
-            "type": "string",
-            "example": "Подарки на день рождения"
+          "403": {
+            "description": "Нет прав на удаление"
           },
-          "description": {
-            "type": "string",
-            "example": "Список желаемых подарков"
+          "404": {
+            "description": "Вишлист не найден"
+          }
+        }
+      }
+    },
+    "/gifts": {
+      "get": {
+        "tags": ["Gifts"],
+        "summary": "Получить все подарки",
+        "responses": {
+          "200": {
+            "description": "Список подарков"
+          }
+        }
+      }
+    },
+    "/gift": {
+      "post": {
+        "tags": ["Gifts"],
+        "summary": "Создать подарок",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Gift"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Подарок создан"
+          }
+        }
+      }
+    },
+    "/gift/{id}": {
+      "get": {
+        "tags": ["Gifts"],
+        "summary": "Получить подарок по ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Подарок найден"
           },
-          "visibility": {
-            "$ref": "#/components/schemas/WishlistVisibility"
+          "404": {
+            "description": "Подарок не найден"
           }
         }
       },
-      "CreateUserRequest": {
-        "type": "object",
-        "required": ["username", "password"],
-        "properties": {
-          "username": {
-            "type": "string",
-            "example": "alex"
-          },
-          "password": {
-            "type": "string",
-            "example": "strongPass123"
+      "delete": {
+        "tags": ["Gifts"],
+        "summary": "Удалить подарок",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
           }
-        }
-      },
-      "ChangeUsernameRequest": {
-        "type": "object",
-        "required": ["username"],
-        "properties": {
-          "username": {
-            "type": "string",
-            "example": "alex_updated"
-          }
-        }
-      },
-      "ChangePasswordRequest": {
-        "type": "object",
-        "required": ["password"],
-        "properties": {
-          "password": {
-            "type": "string",
-            "example": "newStrongPass123"
-          }
-        }
-      },
-      "CreateWishlistRequest": {
-        "type": "object",
-        "required": ["userId", "title", "description", "visibility"],
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "example": 1
-          },
-          "title": {
-            "type": "string",
-            "example": "Хочу купить"
-          },
-          "description": {
-            "type": "string",
-            "example": "Список покупок"
-          },
-          "visibility": {
-            "$ref": "#/components/schemas/WishlistVisibility"
-          }
-        }
-      },
-      "WishlistVisibility": {
-        "type": "string",
-        "enum": ["public", "link_only", "private"],
-        "example": "public"
-      },
-      "UpdateResponse": {
-        "type": "object",
-        "required": ["updated"],
-        "properties": {
-          "updated": {
-            "type": "boolean",
-            "example": true
-          }
-        }
-      },
-      "DeleteResponse": {
-        "type": "object",
-        "required": ["deleted"],
-        "properties": {
-          "deleted": {
-            "type": "boolean",
-            "example": true
-          }
-        }
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "required": ["error"],
-        "properties": {
-          "error": {
-            "type": "string",
-            "example": "Некорректный id. Используй положительное целое число."
+        ],
+        "responses": {
+          "200": {
+            "description": "Подарок удалён"
           }
         }
       }

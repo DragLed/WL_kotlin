@@ -6,40 +6,32 @@ import com.wishlistApp.repository.Users
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+
 
 class ExUserRepo : UserRepository {
 
-    override fun findByUsername(username: String): User? {
-        return transaction {
-            Users.select { Users.username eq username }
-                .map { it.toUser() }
-                .singleOrNull()
-        }
-    }
 
     override fun create(user: User): User {
         return transaction {
+            val moscowTime = java.time.LocalDateTime
+                .now(java.time.ZoneId.of("Europe/Moscow"))
+                .toString()
+
             val id = Users.insert {
                 it[username] = user.username
                 it[password] = user.password
+                it[createdAt] = moscowTime
             }[Users.id]
 
-            user.copy(id = id)
+            user.copy(
+                id = id,
+                createdAt = moscowTime
+            )
         }
     }
 
-
-    override fun findById(id: Int): User? {
-            return transaction {   Users.select { Users.id eq id }
-                .map { it.toUser() }
-                .singleOrNull()
-            }
-    }
-
-    override fun findAll(): List<User> {
-        return transaction { Users.selectAll().map { it.toUser() } }
-
-    }
 
     override fun updatename(id: Int, username: String): Boolean {
         return transaction {
@@ -63,10 +55,38 @@ class ExUserRepo : UserRepository {
         }
     }
 
-    private fun ResultRow.toUser() =  User(
+    override fun findByUsername(username: String): User? {
+        return transaction {
+            Users
+                .selectAll()
+                .where { Users.username eq username }
+                .map { it.toUser() }
+                .singleOrNull()
+        }
+    }
+
+    override fun findById(id: Int): User? {
+        return transaction {
+            Users
+                .selectAll()
+                .where { Users.id eq id }
+                .map { it.toUser() }
+                .singleOrNull()
+        }
+    }
+
+    override fun findAll(): List<User> {
+        return transaction {
+            Users
+                .selectAll()
+                .map { it.toUser() }
+        }
+    }
+
+    private fun ResultRow.toUser() = User(
         id = this[Users.id],
         username = this[Users.username],
-        password = this[Users.password]
-        )
-
+        password = this[Users.password],
+        createdAt = this[Users.createdAt]
+    )
 }

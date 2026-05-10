@@ -32,7 +32,7 @@ class UserService(
 
         val hashedPassword = PasswordUtil.hash(password)
 
-        return userRepository.create(User(0, username, hashedPassword))
+        return userRepository.create(User(0, username, hashedPassword, ""))
     }
 
     fun login(username: String, password: String): TokenResponse {

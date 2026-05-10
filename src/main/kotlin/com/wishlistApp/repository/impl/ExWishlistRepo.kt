@@ -3,83 +3,121 @@ package com.wishlistApp.repository.impl
 import com.wishlistApp.model.Wishlist
 import com.wishlistApp.repository.WishlistRepository
 import com.wishlistApp.repository.Wishlists
-import com.wishlistApp.repository.Wishlists.userId
-import org.jetbrains.exposed.sql.*
+import com.wishlistApp.service.WishlistAccessService
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 
 class ExWishlistRepo : WishlistRepository {
 
+    private val accessService = WishlistAccessService()
+
     override fun create(wishlist: Wishlist): Wishlist {
+        val moscowTime = java.time.LocalDateTime
+            .now(java.time.ZoneId.of("Europe/Moscow"))
+            .toString()
+
         return transaction {
             val id = Wishlists.insert {
                 it[userId] = wishlist.userId
                 it[title] = wishlist.title
                 it[description] = wishlist.description
-//                it[createdAt] = wishlist.createdAt
                 it[visibility] = wishlist.visibility
+                it[createdAt] = moscowTime
             }[Wishlists.id]
 
-            wishlist.copy(id = id)
+            wishlist.copy(
+                id = id,
+                createdAt = moscowTime
+            )
         }
     }
 
+    override fun findById(user_id: Int, wishlist_id: Int): Wishlist? {
+        val wishlist = transaction {
+            Wishlists
+                .selectAll()
+                .where { Wishlists.id eq wishlist_id }
+                .map { it.toWishlist() }
+                .singleOrNull()
+        } ?: return null
 
-     override fun findById(user_id:Int, wishlist_id: Int): Wishlist? {
-             return transaction {   Wishlists.select { (Wishlists.id eq wishlist_id) and (Wishlists.userId eq userId) }
-                 .map { it.toWishlist() }
-                 .singleOrNull()
-             }
-     }
+        return if (accessService.canView(wishlist, user_id)) {
+            wishlist
+        } else {
+            null
+        }
+    }
 
-     override fun findAll(): List<Wishlist> {
-         return transaction { Wishlists.selectAll().map { it.toWishlist() } }
-     }
+    override fun findAll(): List<Wishlist> {
+        return transaction {
+            Wishlists
+                .selectAll()
+                .map { it.toWishlist() }
+        }
+    }
 
-//     override fun update(id: Int, wishlist: Wishlist): Boolean {
-//         return transaction {
-//             Wishlists.update({ Wishlists.id eq id }) {
-//                 it[Wishlists.userId] = wishlist.userId
-//                 it[Wishlists.title] = wishlist.title
-//                 it[Wishlists.description] = wishlist.description
-//                 it[Wishlists.createdAt] = wishlist.createdAt
-//                 it[Wishlists.visibility] = wishlist.visibility
-//             } > 0
-//         }
-//     }
+    override fun update(id: Int, wishlist: Wishlist): Boolean {
+        val existingWishlist = transaction {
+            Wishlists
+                .selectAll()
+                .where { Wishlists.id eq id }
+                .map { it.toWishlist() }
+                .singleOrNull()
+        } ?: return false
 
-//     override fun delete(id: Int): Boolean {
-//         return transaction {   Wishlists.deleteWhere { Wishlists.id eq id } > 0
-//         }
-//     }
+        if (!accessService.canEdit(existingWishlist, wishlist.userId)) {
+            return false
+        }
 
-//     private fun ResultRow.toWishlist() =  Wishlist(
-//         id = this[Wishlists.id],
-//         userId = this[Wishlists.userId],
-//         title = this[Wishlists.title],
-//         description = this[Wishlists.description],
-//         createdAt = this[Wishlists.createdAt],
-//         visibility = this[Wishlists.visibility]
-//         )
+        return transaction {
+            Wishlists.update({ Wishlists.id eq id }) {
+                it[userId] = wishlist.userId
+                it[title] = wishlist.title
+                it[description] = wishlist.description
+                it[visibility] = wishlist.visibility
+            } > 0
+        }
+    }
 
-//                 it[Users.password] = password
-//             } > 0
-//         }
-//     }
+    override fun delete(id: Int): Boolean {
+        return transaction {
+            Wishlists.deleteWhere {
+                Wishlists.id eq id
+            } > 0
+        }
+    }
 
+    fun delete(id: Int, currentUserId: Int): Boolean {
+        val wishlist = transaction {
+            Wishlists
+                .selectAll()
+                .where { Wishlists.id eq id }
+                .map { it.toWishlist() }
+                .singleOrNull()
+        } ?: return false
 
-//     override fun delete(id: Int): Boolean {
-//         return transaction {   Wishlists.deleteWhere { Wishlists.id eq id } > 0
-//         }
-//     }
+        if (!accessService.canDelete(wishlist, currentUserId)) {
+            return false
+        }
 
-    private fun ResultRow.toWishlist() =  Wishlist(
+        return transaction {
+            Wishlists.deleteWhere {
+                Wishlists.id eq id
+            } > 0
+        }
+    }
+
+    private fun ResultRow.toWishlist() = Wishlist(
         id = this[Wishlists.id],
         userId = this[Wishlists.userId],
         title = this[Wishlists.title],
         description = this[Wishlists.description],
-//        createdAt = this[Wishlists.createdAt],
+        createdAt = this[Wishlists.createdAt],
         visibility = this[Wishlists.visibility]
-        )
-
+    )
 }

@@ -9,6 +9,6 @@ data class Wishlist(
     val userId: Int,
     val title: String,
     val description: String,
-//    val createdAt: String?,
+    val createdAt: String,
     val visibility: WishlistVisibility
 )

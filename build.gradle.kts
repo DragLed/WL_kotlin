@@ -19,12 +19,17 @@ val ktorVersion = "2.3.12"
 val exposedVersion = "0.45.0"
 
 dependencies {
+    implementation("io.ktor:ktor-server-status-pages-jvm:${ktorVersion}")
+    implementation("io.ktor:ktor-server-call-logging-jvm:${ktorVersion}")
+
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-server-openapi:$ktorVersion")
     implementation("io.ktor:ktor-server-swagger:$ktorVersion")
+
+    implementation("org.jetbrains.exposed:exposed-java-time:0.61.0")
 
     implementation("org.mindrot:jbcrypt:0.4")
 
@@ -48,7 +53,7 @@ dependencies {
 
 
 kotlin {
-    jvmToolchain(21) // ⚠️ лучше 21, а не 25 (стабильнее)
+    jvmToolchain(21)
 }
 
 tasks.test {

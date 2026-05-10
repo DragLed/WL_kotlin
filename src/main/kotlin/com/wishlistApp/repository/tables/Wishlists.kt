@@ -9,7 +9,7 @@ object Wishlists : Table("wishlists") {
     val title = text("title")
     val description = text("description")
 
-//    val createdAt = text("created_at", 255).nullable()
+    val createdAt = text("created_at")
 
     val visibility = enumerationByName(
         "visibility",
