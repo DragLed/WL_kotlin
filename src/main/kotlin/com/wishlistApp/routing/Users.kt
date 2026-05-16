@@ -12,6 +12,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -139,9 +140,12 @@ fun Route.userRoute(UserService: UserService) {
 
     put("/user/{id}") {
         try {
+            val principal = call.principal<JWTPrincipal>()!!
+            val currentUserId = principal.payload.getClaim("userId").asInt()
+
             val id = call.requirePositiveId()
             val request = call.receive<ChangeUsernameRequest>()
-            val updated = UserService.updatename(id, request.username)
+            val updated = UserService.updatename(id, request.username, currentUserId)
 
             if (updated) {
                 call.respond(HttpStatusCode.OK, mapOf("updated" to true))
@@ -158,9 +162,12 @@ fun Route.userRoute(UserService: UserService) {
 
     put("/user/password/{id}") {
         try {
+            val principal = call.principal<JWTPrincipal>()!!
+            val currentUserId = principal.payload.getClaim("userId").asInt()
+
             val id = call.requirePositiveId()
             val request = call.receive<ChangePasswordRequest>()
-            val updated = UserService.updatepassword(id, request.password)
+            val updated = UserService.updatepassword(id, request.password, currentUserId)
 
             if (updated) {
                 call.respond(HttpStatusCode.OK, mapOf("updated" to true))
@@ -177,8 +184,11 @@ fun Route.userRoute(UserService: UserService) {
 
     delete("/user/{id}") {
         try {
+            val principal = call.principal<JWTPrincipal>()!!
+            val currentUserId = principal.payload.getClaim("userId").asInt()
+
             val id = call.requirePositiveId()
-            val deleted = UserService.delete(id)
+            val deleted = UserService.delete(id, currentUserId)
 
             if (deleted) {
                 call.respond(HttpStatusCode.OK, mapOf("deleted" to true))

@@ -11,6 +11,9 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import com.wishlistApp.model.Gift
+import com.wishlistApp.repository.tables.Gifts
+
 
 class ExWishlistRepo : WishlistRepository {
 
@@ -25,7 +28,7 @@ class ExWishlistRepo : WishlistRepository {
             val id = Wishlists.insert {
                 it[userId] = wishlist.userId
                 it[title] = wishlist.title
-                it[description] = wishlist.description
+                it[description] = wishlist.description ?: ""
                 it[visibility] = wishlist.visibility
                 it[createdAt] = moscowTime
             }[Wishlists.id]
@@ -78,7 +81,7 @@ class ExWishlistRepo : WishlistRepository {
             Wishlists.update({ Wishlists.id eq id }) {
                 it[userId] = wishlist.userId
                 it[title] = wishlist.title
-                it[description] = wishlist.description
+                it[description] = wishlist.description ?: ""
                 it[visibility] = wishlist.visibility
             } > 0
         }
@@ -112,12 +115,32 @@ class ExWishlistRepo : WishlistRepository {
         }
     }
 
-    private fun ResultRow.toWishlist() = Wishlist(
-        id = this[Wishlists.id],
-        userId = this[Wishlists.userId],
-        title = this[Wishlists.title],
-        description = this[Wishlists.description],
-        createdAt = this[Wishlists.createdAt],
-        visibility = this[Wishlists.visibility]
-    )
+    private fun ResultRow.toWishlist(): Wishlist {
+        val wishlistId = this[Wishlists.id]
+        val gifts = Gifts
+            .selectAll()
+            .where { Gifts.wishlistId eq wishlistId }
+            .map { giftRow ->
+                Gift(
+                    id = giftRow[Gifts.id],
+                    WishListId = giftRow[Gifts.wishlistId],
+                    title = giftRow[Gifts.title],
+                    description = giftRow[Gifts.description],
+                    price = giftRow[Gifts.price],
+                    is_reserved = giftRow[Gifts.isReserved],
+                    reserved_by = giftRow[Gifts.reservedBy] ?: 0,
+                    createdAt = giftRow[Gifts.createdAt].toString()
+                )
+            }
+
+        return Wishlist(
+            id = wishlistId,
+            userId = this[Wishlists.userId],
+            title = this[Wishlists.title],
+            description = this[Wishlists.description],
+            visibility = this[Wishlists.visibility],
+            createdAt = this[Wishlists.createdAt],
+            gifts = gifts
+        )
+    }
 }

@@ -736,9 +736,7 @@
       "example" : "Подарки на день рождения"
     },
     "visibility" : {
-      "type" : "string",
-      "example" : "public",
-      "enum" : [ "public", "link_only", "private" ]
+      "$ref" : "#/components/schemas/WishlistVisibility"
     }
   }
 };
@@ -794,7 +792,7 @@
     },
     "createdAt" : {
       "type" : "string",
-      "example" : "2026-05-10T14:30:00"
+      "format" : "date-time"
     }
   }
 };
@@ -848,16 +846,20 @@
       "type" : "string",
       "example" : "Подарки на день рождения"
     },
+    "visibility" : {
+      "$ref" : "#/components/schemas/WishlistVisibility"
+    },
     "createdAt" : {
       "type" : "string",
-      "example" : "2026-05-10T14:30:00"
-    },
-    "visibility" : {
-      "type" : "string",
-      "example" : "public",
-      "enum" : [ "public", "link_only", "private" ]
+      "format" : "date-time"
     }
   }
+};
+            defs["WishlistVisibility"] = {
+  "type" : "string",
+  "description" : "Видимость вишлиста",
+  "default" : "private",
+  "enum" : [ "public", "link_only", "private" ]
 };
   </script>
 
@@ -895,11 +897,14 @@
                     <li data-group="Gifts" data-name="giftIdGet" class="">
                       <a href="#api-Gifts-giftIdGet">giftIdGet</a>
                     </li>
+                    <li data-group="Gifts" data-name="giftIdReservePost" class="">
+                      <a href="#api-Gifts-giftIdReservePost">giftIdReservePost</a>
+                    </li>
+                    <li data-group="Gifts" data-name="giftIdUnreservePost" class="">
+                      <a href="#api-Gifts-giftIdUnreservePost">giftIdUnreservePost</a>
+                    </li>
                     <li data-group="Gifts" data-name="giftPost" class="">
                       <a href="#api-Gifts-giftPost">giftPost</a>
-                    </li>
-                    <li data-group="Gifts" data-name="giftsGet" class="">
-                      <a href="#api-Gifts-giftsGet">giftsGet</a>
                     </li>
                   <li class="nav-header" data-group="Users"><a href="#api-Users">API Methods - Users</a></li>
                     <li data-group="Users" data-name="userIdDelete" class="">
@@ -2392,6 +2397,512 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Gifts-giftIdReservePost">
+                      <article id="api-Gifts-giftIdReservePost-0" data-group="User" data-name="giftIdReservePost" data-version="0">
+                        <div class="pull-left">
+                          <h1>giftIdReservePost</h1>
+                          <p>Забронировать подарок</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/gift/{id}/reserve</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Gifts-giftIdReservePost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdReservePost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdReservePost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Gifts-giftIdReservePost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Gifts-giftIdReservePost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdReservePost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Gifts-giftIdReservePost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Gifts-giftIdReservePost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdReservePost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdReservePost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdReservePost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Gifts-giftIdReservePost-0-curl">
+                           <pre class="prettyprint"><code class="language-bsh">curl -X POST\
+ -H "Authorization: Bearer [[accessToken]]"\
+"http://localhost:8080/gift/{id}/reserve"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
+import io.swagger.client.auth.*;
+import io.swagger.client.model.*;
+import io.swagger.client.api.GiftsApi;
+
+import java.io.File;
+import java.util.*;
+
+public class GiftsApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+
+
+        GiftsApi apiInstance = new GiftsApi();
+        Integer id = 56; // Integer | 
+        try {
+            apiInstance.giftIdReservePost(id);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling GiftsApi#giftIdReservePost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.GiftsApi;
+
+public class GiftsApiExample {
+
+    public static void main(String[] args) {
+        GiftsApi apiInstance = new GiftsApi();
+        Integer id = 56; // Integer | 
+        try {
+            apiInstance.giftIdReservePost(id);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling GiftsApi#giftIdReservePost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+Integer *id = 56; // 
+
+GiftsApi *apiInstance = [[GiftsApi alloc] init];
+
+// Забронировать подарок
+[apiInstance giftIdReservePostWith:id
+              completionHandler: ^(NSError* error) {
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var WishlistAppApi = require('wishlist_app_api');
+var defaultClient = WishlistAppApi.ApiClient.instance;
+
+
+var api = new WishlistAppApi.GiftsApi()
+var id = 56; // {{Integer}} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully.');
+  }
+};
+api.giftIdReservePost(id, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using IO.Swagger.Api;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+namespace Example
+{
+    public class giftIdReservePostExample
+    {
+        public void main()
+        {
+
+
+            var apiInstance = new GiftsApi();
+            var id = 56;  // Integer | 
+
+            try
+            {
+                // Забронировать подарок
+                apiInstance.giftIdReservePost(id);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling GiftsApi.giftIdReservePost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+
+$api_instance = new Swagger\Client\ApiGiftsApi();
+$id = 56; // Integer | 
+
+try {
+    $api_instance->giftIdReservePost($id);
+} catch (Exception $e) {
+    echo 'Exception when calling GiftsApi->giftIdReservePost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::SwaggerClient::Configuration;
+use WWW::SwaggerClient::GiftsApi;
+
+
+my $api_instance = WWW::SwaggerClient::GiftsApi->new();
+my $id = 56; # Integer | 
+
+eval { 
+    $api_instance->giftIdReservePost(id => $id);
+};
+if ($@) {
+    warn "Exception when calling GiftsApi->giftIdReservePost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Gifts-giftIdReservePost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_client
+from swagger_client.rest import ApiException
+from pprint import pprint
+
+
+# create an instance of the API class
+api_instance = swagger_client.GiftsApi()
+id = 56 # Integer | 
+
+try: 
+    # Забронировать подарок
+    api_instance.gift_id_reserve_post(id)
+except ApiException as e:
+    print("Exception when calling GiftsApi->giftIdReservePost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">id*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_giftIdReservePost_id">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      Integer
+                                                  </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 201 - Зарезервировано </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Gifts-giftIdUnreservePost">
+                      <article id="api-Gifts-giftIdUnreservePost-0" data-group="User" data-name="giftIdUnreservePost" data-version="0">
+                        <div class="pull-left">
+                          <h1>giftIdUnreservePost</h1>
+                          <p>Забронировать подарок</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked"></p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/gift/{id}/unreserve</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Gifts-giftIdUnreservePost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Gifts-giftIdUnreservePost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Gifts-giftIdUnreservePost-0-curl">
+                           <pre class="prettyprint"><code class="language-bsh">curl -X POST\
+ -H "Authorization: Bearer [[accessToken]]"\
+"http://localhost:8080/gift/{id}/unreserve"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
+import io.swagger.client.auth.*;
+import io.swagger.client.model.*;
+import io.swagger.client.api.GiftsApi;
+
+import java.io.File;
+import java.util.*;
+
+public class GiftsApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+
+
+        GiftsApi apiInstance = new GiftsApi();
+        Integer id = 56; // Integer | 
+        try {
+            apiInstance.giftIdUnreservePost(id);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling GiftsApi#giftIdUnreservePost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.GiftsApi;
+
+public class GiftsApiExample {
+
+    public static void main(String[] args) {
+        GiftsApi apiInstance = new GiftsApi();
+        Integer id = 56; // Integer | 
+        try {
+            apiInstance.giftIdUnreservePost(id);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling GiftsApi#giftIdUnreservePost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+Integer *id = 56; // 
+
+GiftsApi *apiInstance = [[GiftsApi alloc] init];
+
+// Забронировать подарок
+[apiInstance giftIdUnreservePostWith:id
+              completionHandler: ^(NSError* error) {
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var WishlistAppApi = require('wishlist_app_api');
+var defaultClient = WishlistAppApi.ApiClient.instance;
+
+
+var api = new WishlistAppApi.GiftsApi()
+var id = 56; // {{Integer}} 
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully.');
+  }
+};
+api.giftIdUnreservePost(id, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using IO.Swagger.Api;
+using IO.Swagger.Client;
+using IO.Swagger.Model;
+
+namespace Example
+{
+    public class giftIdUnreservePostExample
+    {
+        public void main()
+        {
+
+
+            var apiInstance = new GiftsApi();
+            var id = 56;  // Integer | 
+
+            try
+            {
+                // Забронировать подарок
+                apiInstance.giftIdUnreservePost(id);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling GiftsApi.giftIdUnreservePost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+
+$api_instance = new Swagger\Client\ApiGiftsApi();
+$id = 56; // Integer | 
+
+try {
+    $api_instance->giftIdUnreservePost($id);
+} catch (Exception $e) {
+    echo 'Exception when calling GiftsApi->giftIdUnreservePost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::SwaggerClient::Configuration;
+use WWW::SwaggerClient::GiftsApi;
+
+
+my $api_instance = WWW::SwaggerClient::GiftsApi->new();
+my $id = 56; # Integer | 
+
+eval { 
+    $api_instance->giftIdUnreservePost(id => $id);
+};
+if ($@) {
+    warn "Exception when calling GiftsApi->giftIdUnreservePost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Gifts-giftIdUnreservePost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_client
+from swagger_client.rest import ApiException
+from pprint import pprint
+
+
+# create an instance of the API class
+api_instance = swagger_client.GiftsApi()
+id = 56 # Integer | 
+
+try: 
+    # Забронировать подарок
+    api_instance.gift_id_unreserve_post(id)
+except ApiException as e:
+    print("Exception when calling GiftsApi->giftIdUnreservePost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">id*</td>
+                                  <td>
+                                  
+                                  
+                                      <div id="d2e199_giftIdUnreservePost_id">
+                                          <div class="json-schema-view">
+                                              <div class="primitive">
+                                                  <span class="type">
+                                                      Integer
+                                                  </span>
+                                  
+                                              </div>
+                                                  <div class="inner required">
+                                                      Required
+                                                  </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  </tr>
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 201 - разрезервировано </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Gifts-giftPost">
                       <article id="api-Gifts-giftPost-0" data-group="User" data-name="giftPost" data-version="0">
                         <div class="pull-left">
@@ -2653,224 +3164,6 @@ except ApiException as e:
 
                           <h2>Responses</h2>
                             <h3> Status: 201 - Подарок создан </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                            </div>
-
-                        </article>
-                      </div>
-                      <hr>
-                    <div id="api-Gifts-giftsGet">
-                      <article id="api-Gifts-giftsGet-0" data-group="User" data-name="giftsGet" data-version="0">
-                        <div class="pull-left">
-                          <h1>giftsGet</h1>
-                          <p>Получить все подарки</p>
-                        </div>
-                        <div class="pull-right"></div>
-                        <div class="clearfix"></div>
-                        <p></p>
-                        <p class="marked"></p>
-                        <p></p>
-                        <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/gifts</span></code></pre>
-                        <p>
-                          <h3>Usage and SDK Samples</h3>
-                        </p>
-                        <ul class="nav nav-tabs nav-tabs-examples">
-                          <li class="active"><a href="#examples-Gifts-giftsGet-0-curl">Curl</a></li>
-                          <li class=""><a href="#examples-Gifts-giftsGet-0-java">Java</a></li>
-                          <li class=""><a href="#examples-Gifts-giftsGet-0-android">Android</a></li>
-                          <!--<li class=""><a href="#examples-Gifts-giftsGet-0-groovy">Groovy</a></li>-->
-                          <li class=""><a href="#examples-Gifts-giftsGet-0-objc">Obj-C</a></li>
-                          <li class=""><a href="#examples-Gifts-giftsGet-0-javascript">JavaScript</a></li>
-                          <!--<li class=""><a href="#examples-Gifts-giftsGet-0-angular">Angular</a></li>-->
-                          <li class=""><a href="#examples-Gifts-giftsGet-0-csharp">C#</a></li>
-                          <li class=""><a href="#examples-Gifts-giftsGet-0-php">PHP</a></li>
-                          <li class=""><a href="#examples-Gifts-giftsGet-0-perl">Perl</a></li>
-                          <li class=""><a href="#examples-Gifts-giftsGet-0-python">Python</a></li>
-                        </ul>
-
-                        <div class="tab-content">
-                          <div class="tab-pane active" id="examples-Gifts-giftsGet-0-curl">
-                           <pre class="prettyprint"><code class="language-bsh">curl -X GET\
- -H "Authorization: Bearer [[accessToken]]"\
-"http://localhost:8080/gifts"</code></pre>
-                          </div>
-                          <div class="tab-pane" id="examples-Gifts-giftsGet-0-java">
-                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
-import io.swagger.client.auth.*;
-import io.swagger.client.model.*;
-import io.swagger.client.api.GiftsApi;
-
-import java.io.File;
-import java.util.*;
-
-public class GiftsApiExample {
-
-    public static void main(String[] args) {
-        ApiClient defaultClient = Configuration.getDefaultApiClient();
-
-
-        GiftsApi apiInstance = new GiftsApi();
-        try {
-            apiInstance.giftsGet();
-        } catch (ApiException e) {
-            System.err.println("Exception when calling GiftsApi#giftsGet");
-            e.printStackTrace();
-        }
-    }
-}</code></pre>
-                          </div>
-
-                          <div class="tab-pane" id="examples-Gifts-giftsGet-0-android">
-                            <pre class="prettyprint"><code class="language-java">import io.swagger.client.api.GiftsApi;
-
-public class GiftsApiExample {
-
-    public static void main(String[] args) {
-        GiftsApi apiInstance = new GiftsApi();
-        try {
-            apiInstance.giftsGet();
-        } catch (ApiException e) {
-            System.err.println("Exception when calling GiftsApi#giftsGet");
-            e.printStackTrace();
-        }
-    }
-}</code></pre>
-                          </div>
-  <!--
-  <div class="tab-pane" id="examples-Gifts-giftsGet-0-groovy">
-  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
-  </div> -->
-                            <div class="tab-pane" id="examples-Gifts-giftsGet-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
-
-GiftsApi *apiInstance = [[GiftsApi alloc] init];
-
-// Получить все подарки
-[apiInstance giftsGetWithCompletionHandler: 
-              ^(NSError* error) {
-                            if (error) {
-                                NSLog(@"Error: %@", error);
-                            }
-                        }];
-</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Gifts-giftsGet-0-javascript">
-                              <pre class="prettyprint"><code class="language-js">var WishlistAppApi = require('wishlist_app_api');
-var defaultClient = WishlistAppApi.ApiClient.instance;
-
-
-var api = new WishlistAppApi.GiftsApi()
-var callback = function(error, data, response) {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log('API called successfully.');
-  }
-};
-api.giftsGet(callback);
-</code></pre>
-                            </div>
-
-                            <!--<div class="tab-pane" id="examples-Gifts-giftsGet-0-angular">
-              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
-            </div>-->
-                            <div class="tab-pane" id="examples-Gifts-giftsGet-0-csharp">
-                              <pre class="prettyprint"><code class="language-cs">using System;
-using System.Diagnostics;
-using IO.Swagger.Api;
-using IO.Swagger.Client;
-using IO.Swagger.Model;
-
-namespace Example
-{
-    public class giftsGetExample
-    {
-        public void main()
-        {
-
-
-            var apiInstance = new GiftsApi();
-
-            try
-            {
-                // Получить все подарки
-                apiInstance.giftsGet();
-            }
-            catch (Exception e)
-            {
-                Debug.Print("Exception when calling GiftsApi.giftsGet: " + e.Message );
-            }
-        }
-    }
-}
-</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Gifts-giftsGet-0-php">
-                              <pre class="prettyprint"><code class="language-php"><&#63;php
-require_once(__DIR__ . '/vendor/autoload.php');
-
-
-$api_instance = new Swagger\Client\ApiGiftsApi();
-
-try {
-    $api_instance->giftsGet();
-} catch (Exception $e) {
-    echo 'Exception when calling GiftsApi->giftsGet: ', $e->getMessage(), PHP_EOL;
-}
-?></code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Gifts-giftsGet-0-perl">
-                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
-use WWW::SwaggerClient::Configuration;
-use WWW::SwaggerClient::GiftsApi;
-
-
-my $api_instance = WWW::SwaggerClient::GiftsApi->new();
-
-eval { 
-    $api_instance->giftsGet();
-};
-if ($@) {
-    warn "Exception when calling GiftsApi->giftsGet: $@\n";
-}</code></pre>
-                            </div>
-
-                            <div class="tab-pane" id="examples-Gifts-giftsGet-0-python">
-                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
-import time
-import swagger_client
-from swagger_client.rest import ApiException
-from pprint import pprint
-
-
-# create an instance of the API class
-api_instance = swagger_client.GiftsApi()
-
-try: 
-    # Получить все подарки
-    api_instance.gifts_get()
-except ApiException as e:
-    print("Exception when calling GiftsApi->giftsGet: %s\n" % e)</code></pre>
-                            </div>
-                          </div>
-
-                          <h2>Parameters</h2>
-
-
-
-
-
-
-                          <h2>Responses</h2>
-                            <h3> Status: 200 - Список подарков </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                             </ul>

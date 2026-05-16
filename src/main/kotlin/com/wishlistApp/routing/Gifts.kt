@@ -1,10 +1,14 @@
 package com.wishlistApp.routing
 
+import com.wishlistApp.dto.MessageResponse
 import com.wishlistApp.model.Gift
 import com.wishlistApp.service.GiftService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -12,6 +16,8 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import kotlin.text.toIntOrNull
+import com.wishlistApp.exception.UnauthorizedException
+import io.ktor.server.auth.authenticate
 
 fun Route.giftRoute(giftService: GiftService) {
 
@@ -23,20 +29,11 @@ fun Route.giftRoute(giftService: GiftService) {
             call.respond(HttpStatusCode.Created, createdGift)
         } catch (e: IllegalArgumentException) {
             call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
-            )
-        }
-    }
-
-    get("/gifts") {
-        try {
-            val gifts = giftService.findAll()
-            call.respond(HttpStatusCode.OK, gifts)
-        } catch (e: Exception) {
-            call.respond(
-                HttpStatusCode.InternalServerError,
-                mapOf("error" to (e.message ?: "Internal server error"))
+                HttpStatusCode.OK,
+                MessageResponse(
+                    success = true,
+                    message = "Подарок успешно зарезервирован"
+                )
             )
         }
     }
@@ -53,16 +50,78 @@ fun Route.giftRoute(giftService: GiftService) {
             }
         } catch (e: IllegalArgumentException) {
             call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
+                HttpStatusCode.OK,
+                MessageResponse(
+                    success = true,
+                    message = "Подарок успешно зарезервирован"
+                )
             )
         }
     }
 
+
+    authenticate("auth-jwt") {
+
+    post("/gift/{id}/reserve") {
+
+        val principal = call.principal<JWTPrincipal>()
+            ?: throw UnauthorizedException("Требуется авторизация")
+
+        val userId = principal.payload
+            .getClaim("userId")
+            .asInt()
+            ?: throw UnauthorizedException("Некорректный токен")
+
+        val giftId = call.parameters["id"]?.toIntOrNull()
+            ?: throw BadRequestException("Некорректный ID подарка")
+
+        giftService.reserve(giftId, userId)
+
+        call.respond(
+            HttpStatusCode.OK,
+            MessageResponse(
+                success = true,
+                message = "Подарок успешно зарезервирован"
+            )
+        )
+    }
+
+    post("/gift/{id}/unreserve") {
+        val principal = call.principal<JWTPrincipal>()
+            ?: throw UnauthorizedException("Требуется авторизация")
+
+        val userId = principal.payload
+            .getClaim("userId")
+            .asInt()
+            ?: throw UnauthorizedException("Некорректный токен")
+
+        val giftId = call.parameters["id"]?.toIntOrNull()
+            ?: throw BadRequestException("Некорректный ID подарка")
+
+        giftService.unreserve(giftId, userId)
+
+        call.respond(
+            HttpStatusCode.OK,
+            MessageResponse(
+                success = true,
+                message = "Подарок успешно разрезервирован"
+            )
+        )
+
+    }
+
     delete("/gift/{id}") {
         try {
-            val id = call.requirePositiveId()
-            val deleted = giftService.delete(id)
+            val principal = call.principal<JWTPrincipal>()
+                ?: throw UnauthorizedException("Требуется авторизация")
+
+            val userId = principal.payload
+                .getClaim("userId")
+                .asInt()
+                ?: throw UnauthorizedException("Некорректный токен")
+
+            val giftId = call.requirePositiveId()
+            val deleted = giftService.delete(giftId, userId)
 
             if (deleted) {
                 call.respond(HttpStatusCode.OK, mapOf("deleted" to true))
@@ -71,11 +130,15 @@ fun Route.giftRoute(giftService: GiftService) {
             }
         } catch (e: IllegalArgumentException) {
             call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
+                HttpStatusCode.OK,
+                MessageResponse(
+                    success = true,
+                    message = "Подарок успешно зарезервирован"
+                )
             )
         }
     }
+}
 }
 
 private fun ApplicationCall.requirePositiveId(): Int {

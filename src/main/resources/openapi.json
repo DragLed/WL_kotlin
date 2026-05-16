@@ -109,6 +109,28 @@
           }
         }
       },
+      "CreateWishlistRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "visibility"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Birthday Wishlist"
+          },
+          "description": {
+            "type": "string",
+            "example": "Подарки на день рождения"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/WishlistVisibility"
+          }
+        }
+      },
+
       "Wishlist": {
         "type": "object",
         "properties": {
@@ -128,35 +150,26 @@
             "type": "string",
             "example": "Подарки на день рождения"
           },
+          "visibility": {
+            "$ref": "#/components/schemas/WishlistVisibility"
+          },
           "createdAt": {
             "type": "string",
+            "format": "date-time",
             "example": "2026-05-10T14:30:00"
-          },
-          "visibility": {
-            "type": "string",
-            "enum": ["public", "link_only", "private"],
-            "example": "public"
           }
         }
       },
-      "CreateWishlistRequest": {
-        "type": "object",
-        "required": ["title", "description", "visibility"],
-        "properties": {
-          "title": {
-            "type": "string",
-            "example": "Birthday Wishlist"
-          },
-          "description": {
-            "type": "string",
-            "example": "Подарки на день рождения"
-          },
-          "visibility": {
-            "type": "string",
-            "enum": ["public", "link_only", "private"],
-            "example": "public"
-          }
-        }
+
+      "WishlistVisibility": {
+        "type": "string",
+        "description": "Видимость вишлиста",
+        "enum": [
+          "public",
+          "link_only",
+          "private"
+        ],
+        "default": "private"
       },
       "Gift": {
         "type": "object",
@@ -192,6 +205,7 @@
           },
           "createdAt": {
             "type": "string",
+            "format": "date-time",
             "example": "2026-05-10T14:30:00"
           }
         }
@@ -520,17 +534,6 @@
         }
       }
     },
-    "/gifts": {
-      "get": {
-        "tags": ["Gifts"],
-        "summary": "Получить все подарки",
-        "responses": {
-          "200": {
-            "description": "Список подарков"
-          }
-        }
-      }
-    },
     "/gift": {
       "post": {
         "tags": ["Gifts"],
@@ -548,6 +551,60 @@
         "responses": {
           "201": {
             "description": "Подарок создан"
+          }
+        }
+      }
+    },
+    "/gift/{id}/reserve": {
+      "post": {
+        "tags": ["Gifts"],
+        "summary": "Забронировать подарок",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Зарезервировано"
+          }
+        }
+      }
+    },
+    "/gift/{id}/unreserve": {
+      "post": {
+        "tags": ["Gifts"],
+        "summary": "Забронировать подарок",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "разрезервировано"
           }
         }
       }

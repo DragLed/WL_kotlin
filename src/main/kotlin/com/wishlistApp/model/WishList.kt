@@ -8,7 +8,8 @@ data class Wishlist(
     val id: Int,
     val userId: Int,
     val title: String,
-    val description: String,
+    val description: String?,
+    val visibility: WishlistVisibility,
     val createdAt: String,
-    val visibility: WishlistVisibility
+    val gifts: List<Gift> = emptyList()
 )

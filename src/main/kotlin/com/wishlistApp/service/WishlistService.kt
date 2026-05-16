@@ -1,8 +1,10 @@
 package com.wishlistApp.service
 
 import com.wishlistApp.core.WishlistVisibility
+import com.wishlistApp.exception.ForbiddenException
 import com.wishlistApp.model.Wishlist
 import com.wishlistApp.repository.WishlistRepository
+import io.ktor.server.plugins.NotFoundException
 
 class WishlistService(
     private val wishlistRepository: WishlistRepository,
@@ -37,7 +39,7 @@ class WishlistService(
 
     fun getById(currentUserId: Int, wishlistId: Int): Wishlist? {
         val wishlist = wishlistRepository.findById(currentUserId, wishlistId)
-            ?: return null
+            ?: throw NotFoundException("Вишлист с id=$wishlistId не найден")
 
         return if (accessService.canView(wishlist, currentUserId)) {
             wishlist
@@ -46,40 +48,40 @@ class WishlistService(
         }
     }
 
-    fun update(
-        wishlistId: Int,
-        currentUserId: Int,
-        title: String,
-        description: String,
-        visibility: WishlistVisibility
-    ): Boolean {
-        require(title.isNotBlank()) { "Название не может быть пустым" }
-        require(description.isNotBlank()) { "Описание не может быть пустым" }
-
-        val existingWishlist =
-            wishlistRepository.findById(currentUserId, wishlistId)
-                ?: return false
-
-        if (!accessService.canEdit(existingWishlist, currentUserId)) {
-            return false
-        }
-
-        val updatedWishlist = existingWishlist.copy(
-            title = title,
-            description = description,
-            visibility = visibility
-        )
-
-        return wishlistRepository.update(wishlistId, updatedWishlist)
-    }
+//    fun update(
+//        wishlistId: Int,
+//        currentUserId: Int,
+//        title: String,
+//        description: String,
+//        visibility: WishlistVisibility
+//    ): Boolean {
+//        require(title.isNotBlank()) { "Название не может быть пустым" }
+//        require(description.isNotBlank()) { "Описание не может быть пустым" }
+//
+//        val existingWishlist =
+//            wishlistRepository.findById(currentUserId, wishlistId)
+//                ?: throw NotFoundException("Вишлист с id=$wishlistId не найден")
+//
+//        if (!accessService.canEdit(existingWishlist, currentUserId)) {
+//            return false
+//        }
+//
+//        val updatedWishlist = existingWishlist.copy(
+//            title = title,
+//            description = description,
+//            visibility = visibility
+//        )
+//
+//        return wishlistRepository.update(wishlistId, updatedWishlist)
+//    }
 
     fun delete(wishlistId: Int, currentUserId: Int): Boolean {
         val wishlist =
             wishlistRepository.findById(currentUserId, wishlistId)
-                ?: return false
+                ?: throw NotFoundException("Вишлист с id=$wishlistId не найден")
 
         if (!accessService.canDelete(wishlist, currentUserId)) {
-            return false
+            throw ForbiddenException("Недостаточно прав")
         }
 
         return wishlistRepository.delete(wishlistId)

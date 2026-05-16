@@ -6,12 +6,8 @@ import com.wishlistApp.repository.Users
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-
 
 class ExUserRepo : UserRepository {
-
 
     override fun create(user: User): User {
         return transaction {
@@ -32,8 +28,10 @@ class ExUserRepo : UserRepository {
         }
     }
 
+    // Изменить имя пользователя можно только самому себе
+    override fun updatename(id: Int, username: String, currentUserId: Int): Boolean {
+        if (id != currentUserId) return false
 
-    override fun updatename(id: Int, username: String): Boolean {
         return transaction {
             Users.update({ Users.id eq id }) {
                 it[Users.username] = username
@@ -41,7 +39,10 @@ class ExUserRepo : UserRepository {
         }
     }
 
-    override fun updatepassword(id: Int, password: String): Boolean {
+    // Изменить пароль можно только самому себе
+    override fun updatepassword(id: Int, password: String, currentUserId: Int): Boolean {
+        if (id != currentUserId) return false
+
         return transaction {
             Users.update({ Users.id eq id }) {
                 it[Users.password] = password
@@ -49,9 +50,12 @@ class ExUserRepo : UserRepository {
         }
     }
 
+    // Удалить пользователя можно только самого себя
+    override fun delete(id: Int, currentUserId: Int): Boolean {
+        if (id != currentUserId) return false
 
-    override fun delete(id: Int): Boolean {
-        return transaction {   Users.deleteWhere { Users.id eq id } > 0
+        return transaction {
+            Users.deleteWhere { Users.id eq id } > 0
         }
     }
 
