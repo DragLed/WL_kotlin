@@ -709,6 +709,41 @@
     }
   }
 };
+            defs["CreateGiftRequest"] = {
+  "required" : [ "createdAt", "description", "is_reserved", "price", "reserved_by", "title", "wishListId" ],
+  "type" : "object",
+  "properties" : {
+    "wishListId" : {
+      "type" : "integer",
+      "example" : 1
+    },
+    "title" : {
+      "type" : "string",
+      "example" : "PlayStation 5"
+    },
+    "description" : {
+      "type" : "string",
+      "example" : "Sony PlayStation 5 Slim"
+    },
+    "price" : {
+      "type" : "number",
+      "format" : "float",
+      "example" : 54999.99
+    },
+    "is_reserved" : {
+      "type" : "boolean",
+      "example" : false
+    },
+    "reserved_by" : {
+      "type" : "integer",
+      "example" : 0
+    },
+    "createdAt" : {
+      "type" : "string",
+      "format" : "date-time"
+    }
+  }
+};
             defs["CreateUserRequest"] = {
   "required" : [ "password", "username" ],
   "type" : "object",
@@ -765,7 +800,7 @@
       "type" : "integer",
       "example" : 1
     },
-    "WishListId" : {
+    "wishListId" : {
       "type" : "integer",
       "example" : 1
     },
@@ -2956,7 +2991,7 @@ public class GiftsApiExample {
 
 
         GiftsApi apiInstance = new GiftsApi();
-        Gift body = ; // Gift | 
+        CreateGiftRequest body = ; // CreateGiftRequest | 
         try {
             apiInstance.giftPost(body);
         } catch (ApiException e) {
@@ -2974,7 +3009,7 @@ public class GiftsApiExample {
 
     public static void main(String[] args) {
         GiftsApi apiInstance = new GiftsApi();
-        Gift body = ; // Gift | 
+        CreateGiftRequest body = ; // CreateGiftRequest | 
         try {
             apiInstance.giftPost(body);
         } catch (ApiException e) {
@@ -2990,7 +3025,7 @@ public class GiftsApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-Gifts-giftPost-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
-Gift *body = ; // 
+CreateGiftRequest *body = ; // 
 
 GiftsApi *apiInstance = [[GiftsApi alloc] init];
 
@@ -3010,7 +3045,7 @@ var defaultClient = WishlistAppApi.ApiClient.instance;
 
 
 var api = new WishlistAppApi.GiftsApi()
-var body = ; // {{Gift}} 
+var body = ; // {{CreateGiftRequest}} 
 
 var callback = function(error, data, response) {
   if (error) {
@@ -3042,7 +3077,7 @@ namespace Example
 
 
             var apiInstance = new GiftsApi();
-            var body = new Gift(); // Gift | 
+            var body = new CreateGiftRequest(); // CreateGiftRequest | 
 
             try
             {
@@ -3065,7 +3100,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 
 $api_instance = new Swagger\Client\ApiGiftsApi();
-$body = ; // Gift | 
+$body = ; // CreateGiftRequest | 
 
 try {
     $api_instance->giftPost($body);
@@ -3082,7 +3117,7 @@ use WWW::SwaggerClient::GiftsApi;
 
 
 my $api_instance = WWW::SwaggerClient::GiftsApi->new();
-my $body = WWW::SwaggerClient::Object::Gift->new(); # Gift | 
+my $body = WWW::SwaggerClient::Object::CreateGiftRequest->new(); # CreateGiftRequest | 
 
 eval { 
     $api_instance->giftPost(body => $body);
@@ -3102,7 +3137,7 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_client.GiftsApi()
-body =  # Gift | 
+body =  # CreateGiftRequest | 
 
 try: 
     # Создать подарок
@@ -3132,7 +3167,7 @@ except ApiException as e:
   "content" : {
     "application/json" : {
       "schema" : {
-        "$ref" : "#/components/schemas/Gift"
+        "$ref" : "#/components/schemas/CreateGiftRequest"
       }
     }
   },

@@ -113,7 +113,7 @@ class UserService(
      * - 404 Not Found -> пользователь не найден
      * - 403 Forbidden -> попытка изменить чужой профиль
      */
-    fun updatename(id: Int, username: String, currentUserId: Int): Boolean {
+    fun updateUsername(id: Int, username: String, currentUserId: Int): Boolean {
         if (username.isBlank()) {
             throw BadRequestException("Имя пользователя не может быть пустым")
         }
@@ -137,7 +137,7 @@ class UserService(
      * - 404 Not Found -> пользователь не найден
      * - 403 Forbidden -> попытка изменить чужой профиль
      */
-    fun updatepassword(id: Int, password: String, currentUserId: Int): Boolean {
+    fun updatePassword(id: Int, password: String, currentUserId: Int): Boolean {
         if (password.isBlank()) {
             throw BadRequestException("Пароль не может быть пустым")
         }

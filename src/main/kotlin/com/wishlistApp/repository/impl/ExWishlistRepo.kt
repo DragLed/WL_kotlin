@@ -123,13 +123,13 @@ class ExWishlistRepo : WishlistRepository {
             .map { giftRow ->
                 Gift(
                     id = giftRow[Gifts.id],
-                    WishListId = giftRow[Gifts.wishlistId],
+                    wishListId = giftRow[Gifts.wishlistId],
                     title = giftRow[Gifts.title],
                     description = giftRow[Gifts.description],
                     price = giftRow[Gifts.price],
                     is_reserved = giftRow[Gifts.isReserved],
                     reserved_by = giftRow[Gifts.reservedBy] ?: 0,
-                    createdAt = giftRow[Gifts.createdAt].toString()
+                    createdAt = giftRow[Gifts.createdAt]
                 )
             }
 

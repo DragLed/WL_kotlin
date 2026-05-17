@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Gift(
     val id: Int,
-    val WishListId: Int,
+    val wishListId: Int,
     val title: String,
     val description: String,
     val price: Float,  

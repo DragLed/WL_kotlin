@@ -21,185 +21,410 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
-import kotlin.text.toIntOrNull
 
-fun Route.userRoute(UserService: UserService) {
-
+fun Route.userRoute(userService: UserService) {
 
     post("/user") {
-
-        val request = call.receive<CreateUserRequest>()
-
         try {
-            val user = UserService.create(
+            val request = call.receive<CreateUserRequest>()
 
-                request.username,
-                request.password
-            )
+            // Валидация входных данных
+            if (request.username.isBlank() || request.password.isBlank()) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to "Username and password cannot be empty")
+                )
+                return@post
+            }
 
+            if (request.username.length < 3 || request.username.length > 50) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to "Username must be between 3 and 50 characters")
+                )
+                return@post
+            }
+
+            if (request.password.length < 6) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to "Password must be at least 6 characters")
+                )
+                return@post
+            }
+
+            val user = userService.create(request.username, request.password)
             call.respond(HttpStatusCode.Created, UserResponse(user.id, request.username))
+
         } catch (e: IllegalArgumentException) {
             call.respond(
                 HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
+                mapOf("error" to (e.message ?: "Invalid input data"))
+            )
+        } catch (e: Exception) {
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                mapOf("error" to "Failed to create user: ${e.message}")
             )
         }
     }
 
     post("/login") {
-        val request = call.receive<LoginRequest>()
-
         try {
-            val tokens = UserService.login(request.username, request.password)
+            val request = call.receive<LoginRequest>()
+
+            // Валидация входных данных
+            if (request.username.isBlank() || request.password.isBlank()) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to "Username and password are required")
+                )
+                return@post
+            }
+
+            val tokens = userService.login(request.username, request.password)
+
             call.response.cookies.append(
                 Cookie(
                     name = "refresh_token",
                     value = tokens.refreshToken,
                     httpOnly = true,
-                    secure = false,
+                    secure = false, // Установите true для production с HTTPS
                     path = "/",
-                    maxAge = 7 * 24 * 60 * 60
+                    maxAge = 7 * 24 * 60 * 60, // 7 дней
+                    domain = null,
+                    extensions = emptyMap()
                 )
             )
 
-            call.respond(tokens.accessToken)
+            call.respond(
+                HttpStatusCode.OK,
+                mapOf("accessToken" to tokens.accessToken)
+            )
+
         } catch (e: IllegalArgumentException) {
-            call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                mapOf("error" to (e.message ?: "Invalid credentials"))
+            )
+        } catch (e: Exception) {
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                mapOf("error" to "Login failed: ${e.message}")
+            )
         }
     }
 
     post("/logout") {
-        call.response.cookies.append(
-            Cookie(
-                name = "refresh_token",
-                value = "",
-                maxAge = 0,
-                path = "/"
+        try {
+            call.response.cookies.append(
+                Cookie(
+                    name = "refresh_token",
+                    value = "",
+                    httpOnly = true,
+                    secure = false,
+                    path = "/",
+                    maxAge = 0, // Удаляем cookie
+                    domain = null,
+                    extensions = emptyMap()
+                )
             )
-        )
 
-        call.respond(HttpStatusCode.OK, "Successfully logged out")
+            call.respond(HttpStatusCode.OK, mapOf("message" to "Successfully logged out"))
+
+        } catch (e: Exception) {
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                mapOf("error" to "Logout failed: ${e.message}")
+            )
+        }
     }
 
     post("/refresh") {
-
-        val refreshToken = call.request.cookies["refresh_token"]
-            ?: return@post call.respond(HttpStatusCode.Unauthorized)
-
         try {
+            val refreshToken = call.request.cookies["refresh_token"]
+
+            if (refreshToken.isNullOrBlank()) {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    mapOf("error" to "Refresh token is missing")
+                )
+                return@post
+            }
+
             val decoded = JwtConfig.verifier().verify(refreshToken)
             val userId = decoded.getClaim("userId").asInt()
 
-            val newAccess = JwtConfig.generateAccessToken(userId)
+            val newAccessToken = JwtConfig.generateAccessToken(userId)
 
-            call.respond(newAccess)
-
+            call.respond(
+                HttpStatusCode.OK,
+                mapOf("accessToken" to newAccessToken)
+            )
 
         } catch (e: Exception) {
-            call.respond(HttpStatusCode.Unauthorized)
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                mapOf("error" to "Invalid or expired refresh token")
+            )
         }
     }
+
     authenticate("auth-jwt") {
         get("/me") {
-            val principal = call.principal<io.ktor.server.auth.jwt.JWTPrincipal>()
-            val userId = principal!!.payload.getClaim("userId").asInt()
+            try {
+                val principal = call.principal<JWTPrincipal>()
 
-            call.respond(mapOf("userId" to userId))
-        }
-    }
+                if (principal == null) {
+                    call.respond(
+                        HttpStatusCode.Unauthorized,
+                        mapOf("error" to "Authentication required")
+                    )
+                    return@get
+                }
 
-    get("/users") {
-        try {
-            val users = UserService.getAll()
-            call.respond(HttpStatusCode.OK, users)
-        } catch (e: IllegalArgumentException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
-            )
-        }
-    }
+                val userId = principal.payload.getClaim("userId").asInt()
+                val user = userService.getById(userId)
 
-    get("/user/{id}") {
-        try {
-            val id = call.requirePositiveId()
-            val user = UserService.getById(id)
+                if (user != null) {
+                    call.respond(HttpStatusCode.OK, user)
+                } else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        mapOf("error" to "User not found")
+                    )
+                }
 
-            if (user != null) {
-                call.respond(HttpStatusCode.OK, user)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+
+
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to "Failed to get user info: ${e.message}")
+                )
             }
-        } catch (e: IllegalArgumentException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
-            )
         }
-    }
 
-    put("/user/{id}") {
-        try {
-            val principal = call.principal<JWTPrincipal>()!!
-            val currentUserId = principal.payload.getClaim("userId").asInt()
+        get("/users") {
+            try {
+                val users = userService.getAll()
+                call.respond(HttpStatusCode.OK, users)
 
-            val id = call.requirePositiveId()
-            val request = call.receive<ChangeUsernameRequest>()
-            val updated = UserService.updatename(id, request.username, currentUserId)
-
-            if (updated) {
-                call.respond(HttpStatusCode.OK, mapOf("updated" to true))
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to "Failed to get users: ${e.message}")
+                )
             }
-        } catch (e: IllegalArgumentException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
-            )
         }
-    }
 
-    put("/user/password/{id}") {
-        try {
-            val principal = call.principal<JWTPrincipal>()!!
-            val currentUserId = principal.payload.getClaim("userId").asInt()
+        get("/user/{id}") {
+            try {
+                val id = call.requirePositiveId()
+                val user = userService.getById(id)
 
-            val id = call.requirePositiveId()
-            val request = call.receive<ChangePasswordRequest>()
-            val updated = UserService.updatepassword(id, request.password, currentUserId)
+                if (user != null) {
+                    call.respond(HttpStatusCode.OK, user)
+                } else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        mapOf("error" to "User not found")
+                    )
+                }
 
-            if (updated) {
-                call.respond(HttpStatusCode.OK, mapOf("updated" to true))
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+            } catch (e: IllegalArgumentException) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to (e.message ?: "Invalid user ID"))
+                )
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to "Failed to get user: ${e.message}")
+                )
             }
-        } catch (e: IllegalArgumentException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
-            )
         }
-    }
 
-    delete("/user/{id}") {
-        try {
-            val principal = call.principal<JWTPrincipal>()!!
-            val currentUserId = principal.payload.getClaim("userId").asInt()
+        put("/user/{id}") {
+            try {
+                val principal = call.principal<JWTPrincipal>()
 
-            val id = call.requirePositiveId()
-            val deleted = UserService.delete(id, currentUserId)
+                if (principal == null) {
+                    call.respond(
+                        HttpStatusCode.Unauthorized,
+                        mapOf("error" to "Authentication required")
+                    )
+                    return@put
+                }
 
-            if (deleted) {
-                call.respond(HttpStatusCode.OK, mapOf("deleted" to true))
-            } else {
-                call.respond(HttpStatusCode.NotFound)
+                val currentUserId = principal.payload.getClaim("userId").asInt()
+                val id = call.requirePositiveId()
+
+                // Проверка прав доступа
+                if (currentUserId != id) {
+                    call.respond(
+                        HttpStatusCode.Forbidden,
+                        mapOf("error" to "You can only change your own username")
+                    )
+                    return@put
+                }
+
+                val request = call.receive<ChangeUsernameRequest>()
+
+                // Валидация нового username
+                if (request.username.isBlank()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "Username cannot be empty")
+                    )
+                    return@put
+                }
+
+                if (request.username.length < 3 || request.username.length > 50) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "Username must be between 3 and 50 characters")
+                    )
+                    return@put
+                }
+
+                val updated = userService.updateUsername(id, request.username, currentUserId)
+
+                if (updated) {
+                    call.respond(HttpStatusCode.OK, mapOf("updated" to true))
+                } else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        mapOf("error" to "User not found")
+                    )
+                }
+
+            } catch (e: IllegalArgumentException) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to (e.message ?: "Invalid input data"))
+                )
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to "Failed to update username: ${e.message}")
+                )
             }
-        } catch (e: IllegalArgumentException) {
-            call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to e.message)
-            )
+        }
+
+        put("/user/password/{id}") {
+            try {
+                val principal = call.principal<JWTPrincipal>()
+
+                if (principal == null) {
+                    call.respond(
+                        HttpStatusCode.Unauthorized,
+                        mapOf("error" to "Authentication required")
+                    )
+                    return@put
+                }
+
+                val currentUserId = principal.payload.getClaim("userId").asInt()
+                val id = call.requirePositiveId()
+
+                // Проверка прав доступа
+                if (currentUserId != id) {
+                    call.respond(
+                        HttpStatusCode.Forbidden,
+                        mapOf("error" to "You can only change your own password")
+                    )
+                    return@put
+                }
+
+                val request = call.receive<ChangePasswordRequest>()
+
+                // Валидация пароля
+                if (request.password.isBlank()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "Password cannot be empty")
+                    )
+                    return@put
+                }
+
+                if (request.password.length < 6) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        mapOf("error" to "Password must be at least 6 characters")
+                    )
+                    return@put
+                }
+
+                val updated = userService.updatePassword(id, request.password, currentUserId)
+
+                if (updated) {
+                    call.respond(HttpStatusCode.OK, mapOf("updated" to true))
+                } else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        mapOf("error" to "User not found")
+                    )
+                }
+
+            } catch (e: IllegalArgumentException) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to (e.message ?: "Invalid input data"))
+                )
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to "Failed to update password: ${e.message}")
+                )
+            }
+        }
+
+        delete("/user/{id}") {
+            try {
+                val principal = call.principal<JWTPrincipal>()
+
+                if (principal == null) {
+                    call.respond(
+                        HttpStatusCode.Unauthorized,
+                        mapOf("error" to "Authentication required")
+                    )
+                    return@delete
+                }
+
+                val currentUserId = principal.payload.getClaim("userId").asInt()
+                val id = call.requirePositiveId()
+
+                // Проверка прав доступа
+                if (currentUserId != id) {
+                    call.respond(
+                        HttpStatusCode.Forbidden,
+                        mapOf("error" to "You can only delete your own account")
+                    )
+                    return@delete
+                }
+
+                val deleted = userService.delete(id, currentUserId)
+
+                if (deleted) {
+                    call.respond(HttpStatusCode.OK, mapOf("deleted" to true))
+                } else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        mapOf("error" to "User not found")
+                    )
+                }
+
+            } catch (e: IllegalArgumentException) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    mapOf("error" to (e.message ?: "Invalid user ID"))
+                )
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to "Failed to delete user: ${e.message}")
+                )
+            }
         }
     }
 }
@@ -207,9 +432,7 @@ fun Route.userRoute(UserService: UserService) {
 private fun ApplicationCall.requirePositiveId(): Int {
     val id = parameters["id"]?.toIntOrNull()
     require(id != null && id > 0) {
-        "Некорректный id. Используй положительное целое число."
+        "Invalid ID format. Please provide a positive integer."
     }
     return id
 }
-
-

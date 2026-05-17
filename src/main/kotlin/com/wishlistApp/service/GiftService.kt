@@ -9,8 +9,8 @@ class GiftService(
     private val giftRepository: GiftRepository
 ) {
 
-    fun create(gift: Gift): Gift {
-        return giftRepository.create(gift)
+    fun create(gift: Gift, UserId: Int): Gift {
+        return giftRepository.create(gift, UserId)
     }
 
     fun findById(id: Int): Gift? {
@@ -18,8 +18,8 @@ class GiftService(
             ?: throw NotFoundException("Подарок с id=$id не найден")
     }
 
-    fun delete(giftId: Int, currentUserId: Int): Boolean {
-        val deleted = giftRepository.delete(giftId, currentUserId)
+    fun delete(giftId: Int, UserId: Int): Boolean {
+        val deleted = giftRepository.delete(giftId, UserId)
 
         when {
             deleted -> return true

@@ -17,21 +17,30 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import com.wishlistApp.exception.UnauthorizedException
 import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
 class ExGiftRepo : GiftRepository {
 
-    override fun create(gift: Gift): Gift {
+    override fun create(gift: Gift, userId: Int): Gift {
         val moscowTime = java.time.LocalDateTime
             .now(java.time.ZoneId.of("Europe/Moscow"))
             .toString()
 
         return transaction {
+            // Проверяем существование вишлиста
+            val wishlist = Wishlists.select  (Wishlists.id eq gift.wishListId).singleOrNull()
+                ?: throw IllegalArgumentException("Вишлист с ID ${gift.wishListId} не найден")
+
+            // Проверяем, что пользователь является владельцем вишлиста
+            if (wishlist[Wishlists.userId] != userId) {
+                throw UnauthorizedException("Только владелец вишлиста может добавлять в него подарки")
+            }
+
             val id = Gifts.insert {
-                it[wishlistId] = gift.WishListId
+                it[wishlistId] = gift.wishListId
                 it[title] = gift.title
                 it[description] = gift.description
                 it[price] = gift.price
@@ -109,7 +118,7 @@ class ExGiftRepo : GiftRepository {
         }
     }
 
-    override fun delete(id: Int, userId: Int): Boolean {
+    override fun delete(id: Int, UserId: Int): Boolean {
         return transaction {
 
             // Получаем подарок
@@ -127,7 +136,7 @@ class ExGiftRepo : GiftRepository {
                 ?: return@transaction false
 
             // Проверяем, что текущий пользователь является владельцем вишлиста
-            if (wishlist[Wishlists.userId] != userId) {
+            if (wishlist[Wishlists.userId] != UserId) {
                 return@transaction false
             }
 
@@ -138,12 +147,13 @@ class ExGiftRepo : GiftRepository {
 
     private fun ResultRow.toGift() = Gift(
         id = this[Gifts.id],
-        WishListId = this[Gifts.wishlistId],
+        wishListId = this[Gifts.wishlistId],
         title = this[Gifts.title],
         description = this[Gifts.description],
         price = this[Gifts.price],
         is_reserved = this[Gifts.isReserved],
         reserved_by = this[Gifts.reservedBy] ?: 0,
-        createdAt = this[Gifts.createdAt].toString()
+        createdAt = this[Gifts.createdAt]
     )
 }
+

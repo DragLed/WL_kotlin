@@ -171,6 +171,50 @@
         ],
         "default": "private"
       },
+      "CreateGiftRequest": {
+        "type": "object",
+        "required": [
+          "wishListId",
+          "title",
+          "description",
+          "price",
+          "is_reserved",
+          "reserved_by",
+          "createdAt"
+        ],
+        "properties": {
+          "wishListId": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "PlayStation 5"
+          },
+          "description": {
+            "type": "string",
+            "example": "Sony PlayStation 5 Slim"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "example": 54999.99
+          },
+          "is_reserved": {
+            "type": "boolean",
+            "example": false
+          },
+          "reserved_by": {
+            "type": "integer",
+            "example": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-10T14:30:00"
+          }
+        }
+      },
       "Gift": {
         "type": "object",
         "properties": {
@@ -178,7 +222,7 @@
             "type": "integer",
             "example": 1
           },
-          "WishListId": {
+          "wishListId": {
             "type": "integer",
             "example": 1
           },
@@ -543,7 +587,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Gift"
+                "$ref": "#/components/schemas/CreateGiftRequest"
               }
             }
           }
